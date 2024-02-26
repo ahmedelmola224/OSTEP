@@ -37,12 +37,12 @@ prompt>
 
 ### Processes and Scheduling
 
-- [x]  [Shell](processes-shell)
+- [ ]  [Shell](processes-shell)
 
 ### Concurrency
 
 - [ ]  [Web Server](concurrency-webserver)
-- [x]  [Parallel Zip](concurrency-pzip)
+- [ ]  [Parallel Zip](concurrency-pzip)
 - [ ]  [MapReduce](concurrency-mapreduce)
 
 ### File Systems
@@ -68,12 +68,12 @@ and install the tools.
 
 ### Processes and Scheduling
 
-- [x] [Scheduling (Lottery)](scheduling-xv6-lottery)
+- [ ] [Scheduling (Lottery)](scheduling-xv6-lottery)
 
 ### Virtual Memory
 
-- [x] [Virtual Memory (Null Pointer and Read-Only Regions)](vm-xv6-intro)
+- [ ] [Virtual Memory (Null Pointer and Read-Only Regions)](vm-xv6-intro)
 
 ### Concurrency
 
-- [x] [Kernel Threads (Basic Implementation)](concurrency-xv6-threads)
+- [ ] [Kernel Threads (Basic Implementation)](concurrency-xv6-threads)
