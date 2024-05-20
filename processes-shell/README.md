@@ -92,6 +92,6 @@ wish> exit
 To compile the code, use the following command:
 
 ```sh
-gcc -o wish wish.c
+gcc -o -Wall -Werror wish wish.c
 ```
 
