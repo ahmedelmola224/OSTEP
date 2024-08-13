@@ -6,7 +6,8 @@
 #include "kernel/spinlock.h"
 #include "kernel/types.h"
 #include "kernel/x86.h"
-
+#include "random.h"
+#include "pstat.h"
 struct ptable ptable;
 
 static struct proc* initproc;
@@ -21,6 +22,10 @@ void pinit(void) {
   initlock(&ptable.lock, "ptable");
 }
 
+void setTickets(int n)
+{
+	proc->tickets=n;	
+}
 // Look in the process table for an UNUSED proc.
 // If found, change state to EMBRYO and initialize
 // state required to run in the kernel.
@@ -37,6 +42,9 @@ static struct proc* allocproc(void) {
   return 0;
 
 found:
+  //when the process is created tickets is 1
+  p->tickets = 1;
+  p->ticks = 0;
   p->state = EMBRYO;
   p->pid = nextpid++;
   release(&ptable.lock);
@@ -134,7 +142,17 @@ int fork(void) {
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
+  // the child has the same number of tickets as the parent
+  if(np->pid==1)
+  {
+	  np->tickets=1;
+  }
+  else
+  {
+	  np->tickets=proc->tickets;
 
+  }
+  np->ticks=0;
   for(i = 0; i < NOFILE; i++)
     if(proc->ofile[i])
       np->ofile[i] = filedup(proc->ofile[i]);
@@ -246,6 +264,7 @@ int wait(void) {
 void scheduler(void) {
   struct proc* p;
   int foundproc = 1;
+  proc=0;
 
   for(;;) {
     // Enable interrupts on this processor.
@@ -256,11 +275,31 @@ void scheduler(void) {
 
     foundproc = 0;
 
+//get total number of tickets
+  unsigned int  totalTickets=0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) { 
+      if(p->state == RUNNABLE)
+      {
+	      totalTickets+=p->tickets;
+      }
+    }
+ // get random ticket
+unsigned int winner = getRandomNumber(0,totalTickets);
+//cprintf("Winner is %d\n",winner);
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    unsigned int counter=0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
       if(p->state != RUNNABLE)
-        continue;
+      {
+      	continue;
+      }
+       counter = counter + p->tickets;
+      if(counter<=winner)
+      {
+	 continue;
+      }
+     
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -269,12 +308,16 @@ void scheduler(void) {
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
+     int startingTick = ticks;
       swtch(&cpu->scheduler, proc->context);
+      p->ticks+=(ticks-startingTick);
       switchkvm();
-
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
+
+      //there is process has been choosed and have run so get out of the loop 
+      break;
     }
     release(&ptable.lock);
   }
@@ -428,4 +471,25 @@ void procdump(void) {
     }
     cprintf("\n");
   }
+}
+
+
+void getInfoFromKernel(struct pstat *status)
+{
+  struct proc* p; 
+  int index=0;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {    
+    index= p - ptable.proc;
+    if(p->state == UNUSED)
+    {
+      status->inuse[index] = 0;
+      continue;
+    }
+    status->inuse[index] = 1;
+    status->tickets[index] = p->tickets;
+    status->pid[index] = p->pid;
+    status->ticks[index] = p->ticks;
+  }
+  release(&ptable.lock);
 }

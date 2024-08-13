@@ -7,6 +7,7 @@
 #include "kernel/stat.h"
 #include "kernel/types.h"
 #include "kernel/x86.h"
+#include "kernel/pstat.h"
 
 // system calls
 int fork(void);
@@ -30,7 +31,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-
+int settickets(int number);
+int getpinfo(struct pstat *);
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

@@ -6,6 +6,7 @@
 #include "kernel/proc.h"
 #include "kernel/types.h"
 #include "kernel/x86.h"
+#include "pstat.h"
 
 int sys_fork(void) {
   return fork();
@@ -72,4 +73,31 @@ int sys_uptime(void) {
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+int sys_settickets(void)
+{
+  int tickets=0;
+  if(argint(0,&tickets)<0)
+	   return -1;
+  else
+  {
+    //assign number of tickets passed from user space to the process
+    setTickets(tickets);
+    return 0;
+  }
+	
+}
+
+int sys_getpinfo(void)
+{
+  struct pstat * status =0 ;
+  if(argptr(0,(void *)&status, sizeof(*status)) < 0)
+    return -1;
+  else
+  {
+    getInfoFromKernel(status);
+    return 0;
+  }
+
 }

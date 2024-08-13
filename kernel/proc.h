@@ -6,7 +6,7 @@
 #include "param.h"
 #include "spinlock.h"
 #include "types.h"
-
+#include "pstat.h"
 // Segments in proc->gdt.
 #define NSEGS 7
 
@@ -81,6 +81,8 @@ struct proc {
   struct file* ofile[NOFILE]; // Open files
   struct inode* cwd;          // Current directory
   char name[16];              // Process name (debugging)
+  int tickets;		      // number of tickets
+  int ticks;		      // number of ticks the process has taken
 };
 
 struct ptable {
@@ -89,7 +91,8 @@ struct ptable {
 };
 
 extern struct ptable ptable;
-
+void getInfoFromKernel(struct pstat *status);
+void setTickets(int n);
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss
