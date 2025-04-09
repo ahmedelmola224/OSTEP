@@ -56,6 +56,7 @@ Careful attention was given to handling pointers passed from user space, followi
 
 ### Graphical Analysis
 A graph was created to demonstrate the scheduler's behavior. The graph plots the number of time slices received by three processes with a 3:2:1 ticket ratio (e.g., Process A: 30 tickets, Process B: 20 tickets, Process C: 10 tickets). This graph illustrates that the processes receive CPU time in proportion to their ticket count.
+
 ![Lottery Scheduler Graph](graph/plot.png)
 
 ### How to Run
